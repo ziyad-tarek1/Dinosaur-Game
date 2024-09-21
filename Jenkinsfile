@@ -11,7 +11,7 @@ pipeline {
         GIT_REPO_NAME = "Dinosaur-Game"
         GIT_REPO_URL  = "https://github.com/ziyad-tarek1/Dinosaur-Game.git"
         DOCKER_CREDENTIALS_ID = 'DockerHub-Cred'
-        DOCKERHUB_REPO = 'ziyadtarek99/myreact-app'
+        DOCKERHUB_REPO = 'ziyadtarek99/Dinosaur-Game'
         K8S_CRED_ID = 'myminikube-cred'
         
     // wcheck the sonarqube configuration
@@ -36,8 +36,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris \
-                    -Dsonar.projectKey=tetris'''
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Dinosaur-Game \
+                    -Dsonar.projectKey=Dinosaur-Game'''
                 }
             }
         }
