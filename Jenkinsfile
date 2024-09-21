@@ -1,5 +1,3 @@
-## Success
-
 pipeline {
     agent any
     tools {
