@@ -13,6 +13,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'DockerHub-Cred'
         DOCKERHUB_REPO = 'ziyadtarek99/myreact-app'
         K8S_CRED_ID = 'myminikube-cred'
+        
+    // wcheck the sonarqube configuration
         SCANNER_HOME = tool 'sonar-scanner'
     }
 
@@ -22,13 +24,15 @@ pipeline {
                     cleanWs()
                 }
             } */
-
+        
+    // works fine
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/ziyad-tarek1/myreact-app.git'
+                git branch: 'main', credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/ziyad-tarek1/Dinosaur-Game.git'
             }
         }
-
+        
+    // works fine
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -37,7 +41,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Quality Gate') {
             steps {
                 script {
@@ -45,7 +50,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Install Dependencies') {
             steps {
                 dir('App') { 
@@ -53,7 +59,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Build') {
             steps {
                 dir('App') { 
@@ -61,7 +68,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Trivy Scan FS') {
             steps {
                 script {
@@ -82,7 +90,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Build Docker Image') {
             steps {
                 dir('App') { // Change to the directory containing the Dockerfile
@@ -97,7 +106,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Push Docker Image') {
             steps {
                 script {
@@ -111,7 +121,8 @@ pipeline {
                 }
             }
         }
-
+        
+    // works fine
         stage('Trivy Scan Image') {
             steps {
                 script {
@@ -161,8 +172,9 @@ pipeline {
             }
         }
 
-        // this stage works fine
-        stage('Deploy to Minikube') {
+        
+    // works fine
+        stage('Deploy to Minikube using ArgoCD') {
             steps {
                 withKubeConfig(credentialsId: "${env.K8S_CRED_ID}") {
                     // Apply the ArgoCD application.yaml to start the CD process
