@@ -13,6 +13,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'DockerHub-Cred'
         DOCKERHUB_REPO = 'ziyadtarek99/myreact-app'
         K8S_CRED_ID = 'myminikube-cred'
+        SCANNER_HOME = tool 'sonar-scanner'
     }
 
     stages {
@@ -25,6 +26,23 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/ziyad-tarek1/myreact-app.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris \
+                    -Dsonar.projectKey=tetris'''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                }
             }
         }
 
@@ -121,12 +139,23 @@ pipeline {
                 script {
 
                     //update the deployment file an push it to git 
+                     sh '''
+
+                        # Update the local deployment file
+                        git config user.email "jenkins@gmail.com"
+                        git config user.name "jenkins"
                     
-                        sh 'sed -i "s|image:.*|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|" k8s/deployment.yaml'
-                        sh 'git add k8s/deployment.yaml'
-                        sh "git commit -m 'Update deployment image to ziyadtarek99/myreact-app:latest'"
+                        sed -i "s|image:.*|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|" k8s/deployment.yaml
+
+                        # Pull latest changes from the remote repository
+                        git pull origin main
+                        # Configure Git remote to use credentials for pushing
+                        git remote set-url origin https://${GIT_USERNAME}:$GITHUB_TOKEN@${GIT_REPO_URL}
+                        git add k8s/deployment.yaml
+                        git commit -m 'Update deployment image to ziyadtarek99/myreact-app:latest'
                         // edit the below line to match my jenkins configration
-                        sh "git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main"
+                        git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main
+                        '''
 
                 }
             }
