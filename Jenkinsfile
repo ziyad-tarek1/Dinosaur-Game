@@ -30,25 +30,7 @@ pipeline {
             }
         }
         
-    // works fine
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Dinosaur-Game \
-                    -Dsonar.projectKey=Dinosaur-Game'''
-                }
-            }
-        }
-        
-    // works fine
-        stage('Quality Gate') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-                }
-            }
-        }
-        
+
     // works fine
         stage('Install Dependencies') {
             steps {
@@ -63,6 +45,25 @@ pipeline {
             steps {
                 dir('App') { 
                     sh "npm run build"
+                }
+            }
+        }
+
+        // works fine
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Dinosaur-Game \
+                    -Dsonar.projectKey=Dinosaur-Game'''
+                }
+            }
+        }
+        
+    // works fine
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
         }
