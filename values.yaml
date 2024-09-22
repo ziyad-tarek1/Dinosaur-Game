@@ -1,1 +1,16 @@
 
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+grafana:
+  adminPassword: "admin"
+  service:
+    type: NodePort
+    port: 80
+
+kube-state-metrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
