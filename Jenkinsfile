@@ -105,22 +105,7 @@ pipeline {
                 }
             }
         }
-        
-    // works fine
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push the Docker image to Docker Hub with the new tag
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push()
-                        
-                        // Tag the image as latest and push it
-                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push('latest')
-                    }
-                }
-            }
-        }
-        
+
     // works fine
         stage('Trivy Scan Image') {
             steps {
@@ -142,6 +127,23 @@ pipeline {
                 }
             }
         }
+
+        
+    // works fine
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to Docker Hub with the new tag
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push()
+                        
+                        // Tag the image as latest and push it
+                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push('latest')
+                    }
+                }
+            }
+        }
+        
 
         stage('Create artifacts or make changes') {
             steps {
