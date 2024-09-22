@@ -17,11 +17,11 @@ pipeline {
     }
 
     stages {
-        /*  stage('Clean Workspace') {
+          stage('Clean Workspace') {
                 steps {
                     cleanWs()
                 }
-            } */
+            } 
         
     // works fine
         stage('Checkout') {
@@ -142,34 +142,32 @@ pipeline {
             }
         }
 
-        // this is the new stage kindly debug it
-        stage('github repo update') {
+        stage('Create artifacts or make changes') {
             steps {
-                script {
-
-                    //update the deployment file an push it to git 
-                     sh '''
-
-                        # Update the local deployment file
-                        git config user.email "jenkins@gmail.com"
-                        git config user.name "jenkins"
-                    
-                        sed -i "s|image:.*|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|" k8s/deployment.yaml
-
-                        # Pull latest changes from the remote repository
-                        git pull origin main
-                        # Configure Git remote to use credentials for pushing
-                        git remote set-url origin https://${GIT_USERNAME}:$GITHUB_TOKEN@${GIT_REPO_URL}
-                        git add k8s/deployment.yaml
-                        git commit -m 'Update deployment image to ziyadtarek99/myreact-app:latest'
-                        // edit the below line to match my jenkins configration
-                        git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main
-                        '''
-
+                dir('k8s') {
+                    // Set up Git configuration for Jenkins user
+                    sh '''
+                        git config --global user.email "jenkins@gmail.com"
+                        git config --global user.name "jenkins"
+                    '''
+                    // Update the deployment file with the new Docker image tag
+                    sh "sed -i \"s|image:.*|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|\" deployment.yaml"
+                    // Add and commit the changes
+                    sh "git add k8s/deployment.yaml"
+                    sh "git commit -m 'Update deployment image to ziyadtarek99/myreact-app:latest'"
                 }
             }
         }
-
+        
+        stage('Push to Git Repository') {
+            steps {
+                dir('k8s') {
+                    withCredentials([usernamePassword(credentialsId: 'ssbostan-github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh "git push -u origin main"
+                    }
+                }
+            }
+        }
         
     // works fine
         stage('Deploy to Minikube using ArgoCD') {
